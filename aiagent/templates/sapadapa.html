@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurinova - SAPADAPA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="{{ url_for('static', filename='images/logobrr.png') }}" type="image/png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #00BFA6;
+            --primary-hover: #009e8f;
+            --secondary-color: #34495e;
+            --text-color: #333;
+            --light-text: #7f8c8d;
+            --background-light: #fdf7f0;
+            --white: #ffffff;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --border-radius: 15px;
+            --message-user-bg: #DCF8C6;
+            --message-bot-bg: #F1F0F0;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: var(--background-light);
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh;
+            width: 100vw; 
+            overflow-x: hidden; 
+            color: var(--text-color); 
+            text-align: center;
+            line-height: 1.6;
+        }
+        
+        .header-section {
+            background-color: var(--primary-color); 
+            color: var(--white); 
+            padding: 2rem 1rem 6rem 1rem;
+            width: 100%; 
+            max-width: 1700px; 
+            position: relative; 
+            z-index: 1;
+        }
+        
+        .header-section h1 { 
+            font-size: clamp(2rem, 5vw, 3em); 
+            margin: 0.5rem 0 0.5rem 0; 
+            letter-spacing: -1px; 
+            line-height: 1.2;
+        }
+        
+        .header-section p { 
+            font-size: clamp(1rem, 3vw, 1.2em); 
+            line-height: 1.4; 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 0 1rem;
+        }
+        
+        .main-content {
+            background-color: var(--white); 
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow); 
+            max-width: 2000px;
+            width: 95%; 
+            margin-top: -4rem; 
+            position: relative; 
+            z-index: 3; 
+            margin-bottom: 2rem;
+        }
+        
+        .sapadapa-intro { 
+            margin-bottom: 2.5rem; 
+        }
+        
+        .sapadapa-intro h2 { 
+            color: var(--primary-color); 
+            font-size: clamp(1.5rem, 3vw, 2.2em); 
+            margin-bottom: 1rem; 
+        }
+        
+        .sapadapa-intro p { 
+            font-size: clamp(0.95rem, 2vw, 1.1em); 
+            line-height: 1.6; 
+            max-width: 900px; 
+            margin: 0 auto; 
+        }
+        
+        .sapadapa-steps { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 1.5rem; 
+            margin: 2rem 0; 
+        }
+        
+        .step-item {
+            background-color: #f8fcfd; 
+            padding: 1.5rem; 
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); 
+            text-align: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .step-item:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12); 
+        }
+        
+        .step-item h3 { 
+            color: var(--secondary-color); 
+            font-size: clamp(1.1rem, 2vw, 1.3em); 
+            margin: 0 0 0.5rem 0; 
+        }
+        
+        .step-item p { 
+            font-size: clamp(0.85rem, 1.5vw, 0.95em); 
+            color: var(--light-text); 
+            line-height: 1.5; 
+        }
+        
+        #chatBox {
+            display: flex; 
+            flex-direction: column; 
+            gap: 0.75rem; 
+            font-size: 0.9rem;
+            background: var(--white); 
+            border-radius: 6px; 
+            padding: 0.75rem; 
+            height: 250px;
+            overflow-y: auto; 
+            scroll-behavior: smooth; 
+            border: 1px solid #ccc; 
+            margin: 1.5rem 0;
+        }
+        
+        .message {
+            max-width: 85%; 
+            padding: 0.75rem 1rem; 
+            border-radius: 18px;
+            white-space: pre-wrap; /* Pastikan baris baru dihormati */
+            word-wrap: break-word; 
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            margin-bottom: 0;
+            font-size: 0.9rem;
+        }
+        
+        .message.user { 
+            align-self: flex-end; 
+            background-color: var(--message-user-bg); 
+            color: #000; 
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message.bot { 
+            align-self: flex-start; 
+            background-color: var(--message-bot-bg); 
+            color: #000; 
+            border-bottom-left-radius: 4px; 
+            text-align: left; 
+            width: fit-content; 
+            margin-bottom: 0;
+            display: flex;
+            flex-direction: column;
+            max-width: 85%;
+        }
+        
+        /* CSS for Markdown rendering inside .message.bot */
+        .message.bot p {
+            margin: 0; /* Override default paragraph margin */
+            margin-bottom: 0.5rem; /* Add specific margin for paragraphs */
+            line-height: 1.5;
+        }
+        .message.bot p:last-child {
+            margin-bottom: 0; /* No margin for last paragraph */
+        }
+        
+        .message.bot ul, 
+        .message.bot ol {
+            padding-left: 1.5rem; /* Standard indent for lists */
+            margin-top: 0.5rem; 
+            margin-bottom: 0.5rem; 
+        }
+
+        .message.bot li {
+            margin-bottom: 0.25rem; 
+        }
+        .message.bot li:last-child {
+            margin-bottom: 0; 
+        }
+        
+        .message.bot h1, 
+        .message.bot h2, 
+        .message.bot h3, 
+        .message.bot h4, 
+        .message.bot h5, 
+        .message.bot h6 {
+            margin-top: 1rem; 
+            margin-bottom: 0.5rem; 
+            color: var(--secondary-color); /* Match with other headings */
+            line-height: 1.2;
+        }
+        .message.bot h1 { font-size: 1.4em; }
+        .message.bot h2 { font-size: 1.3em; }
+        .message.bot h3 { font-size: 1.2em; } /* AI often uses H3 for sub-sections */
+        .message.bot strong {
+            font-weight: 600; 
+        }
+        .message.bot em {
+            font-style: italic; 
+        }
+        .message.bot pre {
+            background-color: #e0e0e0;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85em;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .message.bot code {
+            background-color: #d0d0d0;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85em;
+        }
+        /* Disclaimer styling */
+        .message.bot hr {
+            border: none;
+            border-top: 1px solid #ccc;
+            margin: 1rem 0;
+        }
+        .message.bot .disclaimer {
+            font-size: 0.8em;
+            color: #777;
+            margin-top: 0.5rem;
+            font-style: italic;
+            line-height: 1.3;
+        }
+
+        /* End of Markdown CSS */
+        
+        .message.loading-indicator {
+            display: flex; 
+            flex-direction: row; 
+            align-items: center; 
+            gap: 0.25rem;
+        }
+        
+        .loading-indicator span {
+            display: inline-block; 
+            width: 6px; 
+            height: 6px; 
+            background-color: #555;
+            border-radius: 50%; 
+            opacity: 0; 
+            animation: blink 1.4s infinite ease-in-out;
+        }
+        
+        .loading-indicator span:nth-child(1) { animation-delay: 0s; }
+        .loading-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes blink { 
+            0%, 75%, 100% { opacity: 0; } 
+            25%, 50% { opacity: 1; } 
+        }
+
+        /* Chat Controls - Improved for mobile */
+        .chat-controls {
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            width: 100%;
+        }
+
+        /* Upload Button - Bar Panjang */
+        .upload-long-button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .upload-long-button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Input Group untuk textarea dan tombol kirim - Improved */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            align-items: flex-end;
+        }
+
+        /* Textarea yang bisa melebar - Improved */
+        .chat-textarea {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1em;
+            font-family: 'Poppins', sans-serif;
+            resize: none;
+            min-height: 50px;
+            max-height: 150px;
+            overflow-y: auto;
+            transition: height 0.2s ease;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        /* Tombol Kirim - Improved */
+        .send-btn {
+            height: 50px;
+            min-width: 50px;
+            padding: 0 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Tombol Reset */
+        .reset-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #f0f0f0;
+            color: #333;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .reset-btn:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .back-button {
+            background-color: #f0f0f0; 
+            color: #333; 
+            padding: 0.75rem 1.5rem; 
+            border: 1px solid #ccc;
+            border-radius: 25px; 
+            font-size: 1rem; 
+            font-weight: 500; 
+            cursor: pointer;
+            text-decoration: none; 
+            transition: all 0.3s ease;
+            display: inline-block; 
+            margin-top: 1.5rem;
+            width: auto;
+        }
+        
+        .back-button:hover { 
+            background-color: #e0e0e0; 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); 
+        }
+        
+        .footer {
+            margin-top: 50px;
+            padding: 20px;
+            background-color: #00BFA6;
+            color: white;
+            font-size: 0.85em;
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 0;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .footer-content { 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1700px;
+            padding: 0 20px;
+        }
+        
+        .footer p { 
+            margin: 0;
+            line-height: 1.5;
+            text-align: left;
+        }
+        
+        .social-icons { 
+            display: flex;
+            gap: 10px;
+        }
+        
+        .social-icon {
+            font-size: 1.5em;
+            color: white;
+            transition: color 0.3s ease, background-color 0.3s ease;
+            border: 1px solid white;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+        }
+        
+        .social-icon:hover { 
+            color: #00BFA6;
+            background-color: white;
+        }
+        
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; 
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center; 
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: var(--white); 
+            margin: auto; 
+            padding: 1.5rem; 
+            border: 1px solid #888;
+            border-radius: 10px; 
+            width: 90%; 
+            max-width: 600px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative; 
+            text-align: left;
+        }
+        
+        .close-button {
+            color: #aaa; 
+            float: right; 
+            font-size: 1.5rem; 
+            font-weight: bold;
+            position: absolute; 
+            top: 0.5rem; 
+            right: 1rem; 
+            cursor: pointer;
+        }
+        
+        .close-button:hover, 
+        .close-button:focus { 
+            color: black; 
+            text-decoration: none; 
+            cursor: pointer; 
+        }
+        
+        .modal-content label { 
+            display: block; 
+            margin-bottom: 0.5rem; 
+            font-weight: bold; 
+            color: #555; 
+        }
+        
+        .modal-content input[type="file"] { 
+            width: 100%; 
+            padding: 0.75rem; 
+            margin-bottom: 1rem; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+        }
+        
+        .modal-content button {
+            background-color: var(--primary-color); 
+            color: var(--white); 
+            padding: 0.75rem 1.5rem; 
+            border: none;
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 1rem; 
+            transition: background-color 0.3s ease;
+            margin-top: 0.5rem;
+            width: 100%;
+        }
+        
+        .modal-content button:hover { 
+            background-color: var(--primary-hover); 
+        }
+
+        /* Responsive adjustments - Improved */
+        @media (max-width: 768px) {
+            .header-section {
+                padding: 1.5rem 1rem 5rem 1rem;
+            }
+            
+            .main-content {
+                padding: 1.25rem;
+                margin-top: -3.5rem;
+                width: 98%;
+            }
+            
+            .sapadapa-steps {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .step-item {
+                padding: 1.25rem;
+            }
+            
+            #chatBox {
+                height: 200px;
+            }
+            
+            .modal-content {
+                padding: 1.25rem;
+                width: 95%;
+            }
+
+            /* Improved input group for mobile */
+            .input-group {
+                flex-direction: row; /* Keep side by side on mobile */
+                align-items: stretch;
+            }
+
+            .chat-textarea {
+                min-height: 60px;
+                font-size: 0.95em;
+            }
+
+            .send-btn {
+                height: auto;
+                min-height: 60px;
+                width: 60px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header-section {
+                padding: 1rem 0.5rem 4rem 0.5rem;
+            }
+            
+            .header-section h1 {
+                font-size: 1.75rem;
+            }
+            
+            .header-section p {
+                font-size: 0.9rem;
+            }
+            
+            .main-content {
+                padding: 1rem;
+                margin-top: -3rem;
+                width: 98%;
+            }
+            
+            .sapadapa-intro h2 {
+                font-size: 1.25rem;
+            }
+            
+            .sapadapa-intro p {
+                font-size: 0.9rem;
+            }
+            
+            .step-item h3 {
+                font-size: 1rem;
+            }
+            
+            .step-item p {
+                font-size: 0.85rem;
+            }
+            
+            #chatBox {
+                height: 180px;
+                font-size: 0.85rem;
+            }
+            
+            .message {
+                max-width: 90%;
+                padding: 0.5rem 0.75rem;
+                font-size: 0.85rem;
+            }
+            
+            .back-button {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .footer {
+                padding: 0.75rem;
+            }
+            
+            .footer p {
+                font-size: 0.8rem;
+            }
+            
+            .social-icon {
+                width: 30px;
+                height: 30px;
+                font-size: 1rem;
+            }
+
+            /* Further mobile optimizations */
+            .input-group {
+                gap: 8px;
+            }
+
+            .chat-textarea {
+                padding: 10px 12px;
+                font-size: 0.9em;
+            }
+
+            .send-btn {
+                width: 50px;
+                min-height: 50px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-section">
+        <h1>Aurinova</h1>
+        <p>Pendekatan Sistematis untuk Analisis Data Klasterisasi dengan Bantuan AI Chatbot</p>
+    </div>
+    <div class="main-content">
+        <div class="sapadapa-intro">
+            <h2>Pahami Data Anda Lebih Dalam dengan SAPADAPA</h2>
+            <p>Aurinova mengintegrasikan kerangka Situation Analysis, Problem Analysis, Decision Analysis, dan Potential Problem Analysis ke dalam proses klasterisasi Anda. Chatbot AI kami akan memandu Anda memahami setiap tahap, mengubah hasil data mentah menjadi wawasan yang dapat ditindaklanjuti.</p>
+        </div>
+        <div class="sapadapa-steps">
+            <div class="step-item"><h3>Situation Analysis (Analisis Situasi)</h3><p>Identifikasi dan pahami kondisi saat ini dari data klaster Anda...</p></div>
+            <div class="step-item"><h3>Problem Analysis (Analisis Masalah)</h3><p>Setelah situasi dipahami, fokus pada potensi masalah atau anomali...</p></div>
+            <div class="step-item"><h3>Decision Analysis (Analisis Keputusan)</h3><p>Evaluasi opsi-opsi berdasarkan wawasan yang diperoleh dari klaster...</p></div>
+            <div class="step-item"><h3>Potential Problem Analysis (Analisis Potensi Masalah)</h3><p>Antisipasi dan mitigasi risiko yang mungkin timbul...</p></div>
+        </div>
+        <h3>Coba Chatbot SAPADAPA Kami!</h3>
+        <p>Unggah data CSV Anda untuk bertanya tentang isi datanya, atau tanyakan apa pun kepada AI tentang analisis data dan konsep umum.</p>
+        
+        <div id="chatBox"></div>
+        
+        <div class="chat-controls">
+            <button class="upload-long-button" onclick="openUploadModal()">
+                <i class="fas fa-upload"></i> UPLOAD DATA CSV
+            </button>
+            
+            <div class="input-group">
+                <textarea id="chatInput" class="chat-textarea" placeholder="Ketik pertanyaan Anda..." rows="1"></textarea>
+                <button class="send-btn" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            
+            <button class="reset-btn" onclick="resetChat()">
+                <i class="fas fa-redo"></i> RESET CHAT
+            </button>
+        </div>
+        
+        <a href="{{ url_for('main_app') }}" class="back-button">Mulai Klasterisasi</a>
+    </div>
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeUploadModal()">&times;</span>
+            <h2>Unggah Data Anda</h2>
+            <p>Upload data CSV Anda di sini agar AI dapat membantu menjawab pertanyaan mengenai isi data tersebut.</p>
+            <label for="modalFileInput">Pilih File CSV:</label>
+            <input type="file" id="modalFileInput" accept=".csv" onchange="loadModalCSVHeaders()" />
+            <button onclick="uploadDataFromModal()">Unggah Data</button>
+            <p id="uploadStatus" style="color: red; margin-top: 10px;"></p>
+        </div>
+    </div>
+    <script>
+        let currentSessionId = localStorage.getItem('aurinovaSapadapaSessionId');
+        if (!currentSessionId) {
+            currentSessionId = 'sapadapa_' + Math.random().toString(36).substring(2, 9);
+            localStorage.setItem('aurinovaSapadapaSessionId', currentSessionId);
+        }
+        
+        let detectedDelimiter = ',';
+        // Menyimpan riwayat chat untuk sesi saat ini
+        let chatHistory = []; 
+
+        window.onload = function() { loadCachedData(); };
+
+        async function loadCachedData() {
+            try {
+                const response = await fetch(`/get_cached_data/${currentSessionId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.chat_history && data.chat_history.length > 0) {
+                        chatHistory = data.chat_history; // Load history
+                        chatHistory.forEach(turn => {
+                            // Perhatikan: Struktur history di backend Anda {user: "...", bot: "..."}
+                            // atau mungkin [{role: "user", content: "..."}]
+                            // Asumsi Anda menyimpan {user: "...", bot: "..."}, konversi ke format roles
+                            if (turn.user) {
+                                appendMessage('user', turn.user, false); // false = jangan tambahkan ke history lagi
+                            }
+                            if (turn.bot) {
+                                appendMessage('bot', turn.bot, false); // false = jangan tambahkan ke history lagi
+                            }
+                        });
+                    } else {
+                        appendMessage('bot', 'Halo! Saya Nova, asisten AI dari Aurinova. Anda bisa bertanya apa saja.', false);
+                    }
+                } else {
+                    appendMessage('bot', 'Halo! Saya Nova, asisten AI dari Aurinova. Anda bisa bertanya apa saja.', false);
+                }
+            } catch (error) {
+                console.error("Failed to load cached data:", error);
+                appendMessage('bot', 'Halo! Saya Nova, asisten AI dari Aurinova.', false);
+            }
+        }
+
+        // Modified appendMessage to handle Markdown and optionally add to history
+        function appendMessage(sender, message, addToHistory = true) {
+            const chatBox = document.getElementById('chatBox');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender);
+            
+            if (sender === 'bot') {
+                // Handle disclaimer
+                let parsedText = message.trim();
+                const disclaimerPrefix = "\n\n---\n*Ini adalah analisis yang dihasilkan AI dan tidak boleh dianggap sebagai nasihat keuangan, pendidikan, atau marketing profesional. Selalu konsultasikan dengan ahli di bidangnya untuk keputusan penting.*";
+                
+                if (parsedText.endsWith(disclaimerPrefix)) {
+                    parsedText = parsedText.slice(0, -disclaimerPrefix.length).trim(); // Remove and trim
+                    const parsedMarkdown = marked.parse(parsedText);
+                    // Use marked.parseInline for the disclaimer text itself to allow italic
+                    bubbleDiv = document.createElement('div'); // Create a temporary div for parsing inline markdown
+                    bubbleDiv.innerHTML = marked.parseInline(disclaimerPrefix.replace(/\n\n---/g, '')).trim();
+                    const disclaimerHtml = bubbleDiv.innerHTML;
+                    
+                    messageDiv.innerHTML = parsedMarkdown + '<hr><p class="disclaimer">' + disclaimerHtml + '</p>';
+                } else {
+                    messageDiv.innerHTML = marked.parse(parsedText);
+                }
+            } else {
+                messageDiv.textContent = message;
+            }
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            if (addToHistory) {
+                // Ensure correct role is pushed
+                chatHistory.push({ role: sender === 'user' ? 'user' : 'assistant', content: message });
+            }
+        }
+
+        function showLoadingIndicator() {
+            if (document.querySelector('.loading-indicator')) return;
+            const chatBox = document.getElementById('chatBox');
+            const loadingMessageDiv = document.createElement('div');
+            loadingMessageDiv.classList.add('message', 'loading-indicator');
+            loadingMessageDiv.innerHTML = `<span></span><span></span><span></span>`;
+            chatBox.appendChild(loadingMessageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function removeLoadingIndicator() {
+            const indicator = document.querySelector('.loading-indicator');
+            if (indicator) indicator.remove();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            const modalFileInput = document.getElementById('modalFileInput');
+            const uploadedFile = modalFileInput.files.length > 0 ? modalFileInput.files[0] : null;
+
+            if (!text && !uploadedFile) {
+                // Only alert if there's no text and no file selected
+                appendMessage('bot', 'Mohon ketik pertanyaan atau unggah file CSV untuk memulai.');
+                return;
+            }
+
+            let userMessageContent = text;
+            let fileContent = '';
+
+            if (uploadedFile) {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    fileContent = e.target.result;
+                    // Prepare user message display
+                    if (userMessageContent) {
+                        userMessageContent += `\n\n(Data terlampir: ${uploadedFile.name} - ${fileContent.substring(0, 50)}...)`;
+                    } else {
+                        userMessageContent = `(Mengunggah data: ${uploadedFile.name} - ${fileContent.substring(0, 50)}...)`;
+                    }
+                    appendMessage('user', userMessageContent);
+                    input.value = ''; // Clear input field
+                    modalFileInput.value = ''; // Clear file input
+                    await sendToBackend(text, fileContent);
+                };
+                reader.onerror = () => {
+                    appendMessage('bot', `Gagal membaca file '${uploadedFile.name}'.`);
+                    modalFileInput.value = ''; // Clear file input
+                    removeLoadingIndicator();
+                };
+                reader.readAsText(uploadedFile); // This is asynchronous
+            } else {
+                appendMessage('user', userMessageContent);
+                input.value = ''; // Clear input field
+                await sendToBackend(text, fileContent); // No file, send directly
+            }
+        }
+
+        async function sendToBackend(userQuery, fileData) {
+            showLoadingIndicator();
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        message: userQuery, 
+                        context: 'sapadapa_chat', 
+                        session_id: currentSessionId,
+                        user_data: fileData, // Kirim data file ke backend
+                        chat_history: chatHistory.slice(0, -1) // Kirim history kecuali pesan user terakhir
+                    })
+                });
+                removeLoadingIndicator();
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.reply || errorData.error || 'Gagal terhubung ke AI.');
+                }
+                const data = await response.json();
+                appendMessage('bot', data.reply); // reply is the bot's response
+            } catch (error) {
+                removeLoadingIndicator();
+                appendMessage('bot', 'Error: ' + error.message);
+                // If there's an error, remove the last user message from history
+                if (chatHistory.length > 0) {
+                    chatHistory.pop(); 
+                }
+            }
+        }
+
+        document.getElementById('chatInput').addEventListener('keypress', e => { 
+            if (e.key === 'Enter' && !e.shiftKey) { // Prevent sending on Shift+Enter for new line
+                e.preventDefault(); 
+                sendMessage(); 
+            } 
+        });
+
+        // Auto-resize textarea
+        document.getElementById('chatInput').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+        
+        function openUploadModal() { document.getElementById('uploadModal').style.display = 'flex'; }
+        function closeUploadModal() { document.getElementById('uploadModal').style.display = 'none'; }
+        
+        function loadModalCSVHeaders() {
+            const input = document.getElementById('modalFileInput');
+            if (!input.files.length) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                const firstLine = e.target.result.split('\n')[0].trim();
+                if (firstLine.includes(';')) detectedDelimiter = ';';
+                else if (firstLine.includes('\t')) detectedDelimiter = '\t';
+                else detectedDelimiter = ',';
+            };
+            reader.readAsText(input.files[0]);
+        }
+        
+        async function uploadDataFromModal() {
+            const fileInput = document.getElementById('modalFileInput');
+            const uploadStatus = document.getElementById('uploadStatus');
+            if (!fileInput.files.length) {
+                uploadStatus.textContent = 'Mohon pilih file CSV!'; return;
+            }
+            uploadStatus.textContent = 'Mengunggah...';
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('delimiter', detectedDelimiter);
+            formData.append('session_id', currentSessionId);
+            try {
+                const response = await fetch('/upload_for_sapadapa', { method: 'POST', body: formData });
+                if (!response.ok) throw new Error((await response.json()).error || 'Upload gagal.');
+                const data = await response.json();
+                closeUploadModal();
+                if (data.ai_question) appendMessage('bot', data.ai_question);
+                
+                // Add a user message indicating file upload
+                appendMessage('user', `Saya telah mengunggah file '${fileInput.files[0].name}'.`);
+                // Clear the modal file input after successful upload
+                fileInput.value = '';
+                uploadStatus.textContent = ''; // Clear status message
+            } catch (error) {
+                uploadStatus.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function resetChat() {
+            const userIsSure = await showCustomConfirm("Anda yakin ingin mereset chat dan data?");
+            if (!userIsSure) return;
+            document.getElementById('chatBox').innerHTML = '';
+            chatHistory = []; // Clear local chat history
+            
+            const oldSessionId = currentSessionId;
+            currentSessionId = 'sapadapa_' + Math.random().toString(36).substring(2, 9);
+            localStorage.setItem('aurinovaSapadapaSessionId', currentSessionId);
+            try {
+                await fetch('/reset_session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: oldSessionId })
+                });
+            } catch (error) { console.error("Gagal mereset sesi di backend:", error); }
+            appendMessage('bot', 'Sesi telah direset. Halo! Saya Nova, asisten AI dari Aurinova. Anda bisa bertanya apa saja.');
+        }
+
+        function showCustomConfirm(message) {
+            return new Promise(resolve => {
+                const confirmBox = document.createElement('div');
+                confirmBox.style.cssText = `position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000;`;
+                const contentBox = document.createElement('div');
+                contentBox.style.cssText = `background: white; padding: 25px; border-radius: 10px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3);`;
+                const messageP = document.createElement('p');
+                messageP.textContent = message;
+                messageP.style.marginBottom = '20px';
+                const btnYes = document.createElement('button');
+                btnYes.textContent = 'Ya, Reset';
+                btnYes.style.marginRight = '10px';
+                btnYes.style.cssText += ` background-color: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; `; // Add styles
+                btnYes.onmouseover = function() { this.style.backgroundColor = 'var(--primary-hover)'; };
+                btnYes.onmouseout = function() { this.style.backgroundColor = 'var(--primary-color)'; };
+                btnYes.onclick = () => { document.body.removeChild(confirmBox); resolve(true); };
+
+                const btnNo = document.createElement('button');
+                btnNo.textContent = 'Batal';
+                btnNo.style.backgroundColor = '#6c757d';
+                btnNo.style.cssText += ` background-color: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; `; // Add styles
+                btnNo.onmouseover = function() { this.style.backgroundColor = '#5a6268'; };
+                btnNo.onmouseout = function() { this.style.backgroundColor = '#6c757d'; };
+                btnNo.onclick = () => { document.body.removeChild(confirmBox); resolve(false); };
+
+                contentBox.appendChild(messageP);
+                contentBox.appendChild(btnYes);
+                contentBox.appendChild(btnNo);
+                confirmBox.appendChild(contentBox);
+                document.body.appendChild(confirmBox);
+            });
+        }
+
+        // Initialize textarea height
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatInput = document.getElementById('chatInput');
+            if (chatInput) {
+                chatInput.style.height = 'auto';
+                chatInput.style.height = (chatInput.scrollHeight) + 'px';
+            }
+        });
+    </script>
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 Aurinova. All rights reserved.</p>
+            <div class="social-icons">
+                <a href="https://www.linkedin.com/in/java-sika-maulana-167387320/" class="social-icon" aria-label="LinkedIn" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                <a href="https://www.instagram.com/javamlna/" class="social-icon" aria-label="Instagram" target="_blank"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

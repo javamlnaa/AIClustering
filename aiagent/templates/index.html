@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurinova - Klasterisasi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="{{ url_for('static', filename='images/logobrr.png') }}" type="image/png" />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #00BFA6;
+            --primary-hover: #009e8f;
+            --secondary-color: #34495e;
+            --text-color: #333;
+            --light-text: #7f8c8d;
+            --background-light: #fdf7f0;
+            --white: #ffffff;
+            --shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            --border-radius: 10px;
+            --message-user-bg: #DCF8C6;
+            --message-bot-bg: #F1F0F0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--background-light);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 2000px;
+            margin: 0 auto;
+        }
+
+        .panel {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel h2 {
+            margin: 0 0 15px 0;
+            font-size: 1.3rem;
+            color: var(--secondary-color);
+            text-align: center;
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            order: 1;
+        }
+
+        /* Overview Section */
+        .overview-section {
+            order: 2;
+        }
+
+        /* Visual Section */
+        .visual-section {
+            order: 3;
+        }
+
+        /* Chat Section */
+        .chat-section {
+            order: 4;
+        }
+
+        /* Form Elements */
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        input[type="file"],
+        select,
+        input[type="number"],
+        input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: var(--white);
+            font-family: 'Inter', sans-serif;
+        }
+
+        input[type="file"] {
+            padding: 8px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-family: 'Inter', sans-serif;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Feature Checkboxes */
+        #featureCheckboxes {
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            background: var(--white);
+        }
+
+        #featureCheckboxes label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        #featureCheckboxes input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+            margin-bottom: 0;
+        }
+
+        /* Visual Content */
+        #visualContent {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 80%;
+        }
+
+        #clusterPlot {
+            max-width: 80%;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin: 10px;
+            display: none;
+        }
+
+        #plotErrorMsg {
+            color: #e74c3c;
+            text-align: center;
+            margin: 10px;
+        }
+
+        /* Download Buttons */
+        .download-button {
+            display: none;
+            margin-top: 15px;
+            padding: 10px 15px;
+            background: var(--primary-color);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+
+        .download-button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Overview Tables */
+        #overviewTables {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        #overviewTables table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 15px 0;
+            font-size: 0.9rem;
+        }
+
+        #overviewTables th, 
+        #overviewTables td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        #overviewTables th {
+            background-color: #f5f5f5;
+            font-weight: 600;
+        }
+
+        #overviewTables h3 {
+            margin: 20px 0 10px 0;
+            font-size: 1.1rem;
+            color: var(--secondary-color);
+        }
+
+        /* Chat Box */
+        #chatBox {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: var(--white);
+            border-radius: 6px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            flex: 1;
+            min-height: 200px;
+            max-height: 300px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        .chat-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .chat-controls input {
+            flex: 1;
+            margin: 0;
+        }
+
+        .chat-controls button {
+            width: auto;
+            min-width: 80px;
+            margin: 0;
+        }
+
+        /* Messages */
+        .message {
+            max-width: 85%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background-color: var(--message-user-bg);
+            color: #000;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+            background-color: var(--message-bot-bg);
+            color: #000;
+            border-bottom-left-radius: 4px;
+            text-align: left;
+            width: fit-content;
+            max-width: 85%;
+            flex-direction: column;
+            display: flex;
+        }
+
+        .message.bot * {
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+        }
+
+        .message.bot p:not(:last-child),
+        .message.bot h1:not(:last-child),
+        .message.bot h2:not(:last-child),
+        .message.bot h3:not(:last-child),
+        .message.bot h4:not(:last-child),
+        .message.bot h5:not(:last-child),
+        .message.bot h6:not(:last-child),
+        .message.bot div:not(:last-child) {
+            margin-bottom: 8px !important;
+        }
+
+        .message.bot ul,
+        .message.bot ol {
+            padding-left: 20px !important;
+            margin: 8px 0 !important;
+        }
+
+        .message.bot li:not(:last-child) {
+            margin-bottom: 5px !important;
+        }
+
+        /* Loading Indicator */
+        .message.loading-indicator {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .loading-indicator span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background-color: #555;
+            border-radius: 50%;
+            opacity: 0;
+            animation: blink 1.4s infinite ease-in-out;
+        }
+
+        .loading-indicator span:nth-child(1) { animation-delay: 0s; }
+        .loading-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes blink {
+            0%, 75%, 100% { opacity: 0; }
+            25%, 50% { opacity: 1; }
+        }
+
+        /* Responsive Layout */
+        @media (min-width: 768px) {
+            .app-container {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: auto auto 1fr;
+                grid-template-areas:
+                    "upload overview"
+                    "visual visual"
+                    "chat chat";
+                gap: 20px;
+                height: calc(100vh - 40px);
+            }
+
+            .upload-section { grid-area: upload; }
+            .overview-section { grid-area: overview; }
+            .visual-section { grid-area: visual; }
+            .chat-section { grid-area: chat; }
+
+            .panel {
+                height: 100%;
+                min-height: 0;
+            }
+
+            #chatBox {
+                max-height: none;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .app-container {
+                grid-template-columns: 1fr 1fr 1fr;
+                grid-template-rows: auto 1fr;
+                grid-template-areas:
+                    "upload overview visual"
+                    "chat chat chat";
+            }
+
+            .chat-section {
+                min-height: 300px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .app-container {
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+                grid-template-rows: 1fr 1fr;
+                grid-template-areas:
+                    "upload overview visual visual"
+                    "chat chat chat chat";
+            }
+        }
+
+        @media (min-width: 1600px) {
+            .app-container {
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+                grid-template-rows: 1fr 1fr;
+                grid-template-areas:
+                    "upload overview visual visual"
+                    "upload chat chat chat";
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="panel upload-section">
+            <h2>Parameter Analisis</h2>
+            <div class="panel-content">
+                <label for="fileInput">1. Pilih File CSV</label>
+                <input type="file" id="fileInput" accept=".csv" onchange="loadCSVHeaders()" />
+
+                <label for="algorithm">2. Pilih Algoritma</label>
+                <select id="algorithm">
+                    <option value="kmeans">K-Means</option>
+                    <option value="dbscan">DBSCAN</option>
+                </select>
+
+                <label for="nClusters">3. Jumlah Cluster (Opsional untuk K-Means)</label>
+                <input type="number" id="nClusters" min="1" placeholder="Kosongkan untuk otomatis"/>
+
+                <label for="featureCheckboxes">4. Pilih Fitur</label>
+                <div id="featureCheckboxes"><p style="color: #666; font-style: italic;">Pilih file untuk melihat fitur...</p></div>
+
+                <button class="upload-button" onclick="upload()">Unggah & Analisis</button>
+            </div>
+        </div>
+
+        <div class="panel overview-section">
+            <h2>Gambaran Umum Data</h2>
+            <div class="panel-content" id="overviewTables">
+            </div>
+            <a id="downloadCsv" class="download-button" href="#" download>Unduh File Hasil</a>
+        </div>
+
+        <div class="panel visual-section">
+            <h2>Hasil Klasterisasi</h2>
+            <div class="panel-content" id="visualContent">
+                <img id="clusterPlot" alt="Hasil plot klasterisasi"/>
+                <p id="plotErrorMsg"></p>
+                </div>
+            <a id="downloadPlot" class="download-button" href="#" download>Unduh Gambar Plot</a>
+        </div>
+
+        <div class="panel chat-section">
+            <h2>Obrolan dengan AI</h2>
+            <div id="chatBox">
+                <div class="message bot">
+                    <p>Halo! Saya Nova. Silakan unggah data Anda dan jalankan analisis di panel kiri, lalu tanyakan apa pun tentang hasilnya di sini.</p>
+                </div>
+            </div>
+            <div class="chat-controls">
+                <input type="text" id="chatInput" placeholder="Tanyakan tentang hasil..." />
+                <button onclick="sendMessage()">Kirim</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        let currentSessionId = localStorage.getItem('aurinovaMainAppSessionId');
+        if (!currentSessionId) {
+            currentSessionId = 'main_app_' + Math.random().toString(36).substring(2, 9);
+            localStorage.setItem('aurinovaMainAppSessionId', currentSessionId);
+        }
+        
+        let detectedDelimiter = ',';
+
+        function loadCSVHeaders() {
+            const input = document.getElementById('fileInput');
+            if (input.files.length === 0) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const firstLine = e.target.result.split('\n')[0].trim();
+                
+                if (firstLine.includes(';')) detectedDelimiter = ';';
+                else if (firstLine.includes('\t')) detectedDelimiter = '\t';
+                else detectedDelimiter = ',';
+
+                const headers = firstLine.split(detectedDelimiter).map(h => h.trim());
+                const featureCheckboxesContainer = document.getElementById('featureCheckboxes');
+                featureCheckboxesContainer.innerHTML = '';
+                
+                headers.forEach(h => {
+                    if (!h) return; 
+                    const label = document.createElement('label');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = h;
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(' ' + h));
+                    featureCheckboxesContainer.appendChild(label);
+                });
+            };
+            reader.readAsText(input.files[0]);
+        }
+
+        function createTableFromObject(obj, title) {
+            const container = document.createElement('div');
+            const heading = document.createElement('h3');
+            heading.textContent = title;
+            container.appendChild(heading);
+
+            const table = document.createElement('table');
+            if (title.toLowerCase().includes('jumlah data')) {
+                 const header = `<thead><tr><th>Cluster</th><th>Jumlah Data</th></tr></thead>`;
+                 const rows = Object.entries(obj).map(([key, value]) => `<tr><td>${key}</td><td>${value}</td></tr>`).join('');
+                 table.innerHTML = header + `<tbody>${rows}</tbody>`;
+            } else {
+                 table.innerHTML = `<thead><tr><th>Kunci</th><th>Nilai</th></tr></thead>` + `<tbody>` + Object.entries(obj).map(([key, value]) => `<tr><td>${key}</td><td>${JSON.stringify(value)}</td></tr>`).join('') + `</tbody>`;
+            }
+            container.appendChild(table);
+            return container;
+        }
+
+        function appendMessage(sender, message) {
+            const chatBox = document.getElementById('chatBox');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender);
+            
+            if (sender === 'bot') {
+                messageDiv.innerHTML = marked.parse(message.trim());
+            } else {
+                messageDiv.textContent = message;
+            }
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function showLoadingIndicator() {
+            if (document.querySelector('.loading-indicator')) return;
+            const chatBox = document.getElementById('chatBox');
+            const loadingMessageDiv = document.createElement('div');
+            loadingMessageDiv.classList.add('message', 'loading-indicator');
+            loadingMessageDiv.innerHTML = `<span></span><span></span><span></span>`;
+            chatBox.appendChild(loadingMessageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function removeLoadingIndicator() {
+            const indicator = document.querySelector('.loading-indicator');
+            if (indicator) indicator.remove();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+            appendMessage('user', text);
+            input.value = '';
+            showLoadingIndicator();
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text, session_id: currentSessionId, context: 'clustering_result' })
+                });
+                
+                removeLoadingIndicator();
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.reply || 'Gagal terhubung ke AI.');
+                }
+                const data = await response.json();
+                appendMessage('bot', data.reply);
+            } catch (error) {
+                removeLoadingIndicator();
+                appendMessage('bot', 'Error: ' + error.message);
+            }
+        }
+
+        async function upload() {
+            const input = document.getElementById('fileInput');
+            if (input.files.length === 0) {
+                alert('Mohon pilih file CSV terlebih dahulu!');
+                return;
+            }
+            
+            const selectedFeatures = Array.from(document.querySelectorAll('#featureCheckboxes input:checked')).map(cb => cb.value);
+            if (selectedFeatures.length < 2) {
+                alert('Mohon pilih minimal 2 fitur untuk klasterisasi.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', input.files[0]);
+            formData.append('delimiter', detectedDelimiter);
+            formData.append('session_id', currentSessionId);
+            formData.append('algorithm', document.getElementById('algorithm').value);
+            formData.append('features', selectedFeatures.join(','));
+            const nClusters = document.getElementById('nClusters').value;
+            if (nClusters) formData.append('n_clusters', nClusters);
+            
+            const overviewDiv = document.getElementById('overviewTables');
+            const visualContentP = document.getElementById('visualContent').querySelector('p');
+            const img = document.getElementById('clusterPlot');
+            const downloadCsv = document.getElementById('downloadCsv');
+            const downloadPlot = document.getElementById('downloadPlot');
+            const plotErrorMsg = document.getElementById('plotErrorMsg');
+
+            overviewDiv.innerHTML = '<p>Memproses...</p>';
+            if (visualContentP) visualContentP.style.display = 'none';
+            img.style.display = 'none';
+            plotErrorMsg.textContent = '';
+            downloadCsv.style.display = 'none';
+            downloadPlot.style.display = 'none';
+            document.getElementById('chatBox').innerHTML = ''; 
+            appendMessage('bot', 'Menganalisis data Anda, mohon tunggu...'); 
+
+            try {
+                const response = await fetch('/upload', { method: 'POST', body: formData });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Upload gagal. Periksa terminal server untuk detail.');
+                }
+                
+                overviewDiv.innerHTML = '';
+                if (data.clusters) {
+                    overviewDiv.appendChild(createTableFromObject(data.clusters, 'Jumlah Data per Cluster'));
+                }
+
+                if (data.plot_url) {
+                    img.src = data.plot_url + '?' + new Date().getTime();
+                    img.style.display = 'block';
+                    downloadPlot.href = data.plot_url;
+                    downloadPlot.style.display = 'inline-block';
+                } else {
+                    plotErrorMsg.textContent = 'Plot tidak dapat dibuat (mungkin tidak cukup fitur numerik).';
+                }
+
+                if (data.csv_url) {
+                    downloadCsv.href = data.csv_url;
+                    downloadCsv.style.display = 'inline-block';
+                }
+                
+                document.getElementById('chatBox').innerHTML = ''; 
+                appendMessage('bot', 'Analisis selesai! Anda sekarang bisa bertanya tentang hasilnya.');
+
+            } catch (error) {
+                overviewDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                document.getElementById('chatBox').innerHTML = ''; 
+                appendMessage('bot', `Terjadi kesalahan: ${error.message}`);
+            }
+        }
+
+        document.getElementById('chatInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
