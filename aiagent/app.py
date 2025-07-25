@@ -17,10 +17,6 @@ from sklearn.metrics import silhouette_score, davies_bouldin_score
 
 load_dotenv()
 
-# Gunakan cache sesi untuk data yang relevan per user
-# Untuk hosting di App Engine, gunakan Cloud Datastore/Firestore atau Redis untuk session_data_cache
-# Jika ini adalah aplikasi single-user atau hanya demo, dictionary sederhana ini bisa bekerja
-# tapi tidak akan persisten antar instance App Engine atau restart server.
 session_data_cache = {}
 app = Flask(__name__)
 CORS(app)
